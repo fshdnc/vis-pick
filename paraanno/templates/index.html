@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/css/bootstrap4-toggle.min.css" rel="stylesheet">
+
+
+
+
+    <title>[VIS] Batch list </title>
+  </head>
+  <body>
+
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-3">
+          <img src="{{url_for('static', filename='turkunlp_final.png')}}" class="img-thumbnail" alt="TurkuNLP.org">
+        </div>
+        <div class="col-sm-9">
+          <h3>Paraphrase project - Visualize picked sentences</h3>
+        </div>
+      </div>
+        
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{app_root}}/">home</a></li>
+      </ol>
+      
+      {% for name,b,filename in batches %}
+      <div class="row">
+
+	<div class="col-4"><a href="{{app_root}}/ann/{{filename}}">{{name}}</a></div>
+	<div class="col-4"><a href="{{app_root}}/ann/{{filename}}">{{filename}}</a></div>
+	{% set touched,extracted=b.get_anno_stats %}
+	<div class="col-4">{{extracted}} pairs in {{touched}} block(s)</div>
+	
+      </div>
+      {% endfor %}
+
+    </div>
+    
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/js/bootstrap4-toggle.min.js"></script>
+    <script>
+
+    </script>
+    
+  </body>
+</html>
