@@ -3,13 +3,13 @@
 import re
 
 sanitize_re=re.compile(r"[^a-zäöåA-ZÄÖÅ0-9 ]")
-#whitespace_re=re.compile(r"\s+")
+whitespace_re=re.compile(r"\s+")
 #suspicious_chars=re.compile("[lL1äaöo]")
 
 def sanitize(txt):
     txt_clean=sanitize_re.sub("",txt) #remove weird characters and punctuation
     #txt_clean=suspicious_chars.sub("",txt_clean) #remove lL1 which get OCR-destroyed anyway
-    #txt_clean=whitespace_re.sub(" ",txt_clean) #replace all whitespace with a single space
+    txt_clean=whitespace_re.sub("",txt_clean) #replace all whitespace with a single space
     return txt_clean.strip().lower() #strip and lowercase
 
 def process_txt(text):
@@ -70,18 +70,6 @@ def map_processed_text(before, after):
             break
     return mapping
 
-#def locate_segment_in_original_text(segment, after, mapping):
-def INDEX_locate_segment_in_original_text(segment, after, mapping):
-    """
-    Search for where the segment of text locates in the text before processing
-    """
-    try:
-        a_start = after.index(segment)
-        a_end = a_start + len(segment)
-        return (mapping[a_start], mapping[a_end-1]+1)
-    except ValueError:
-        return (0, 0)
-
 def locate_segment_in_original_text(segment, after, mapping):
     """
     Search for where the segment of text locates in the text before processing
@@ -89,13 +77,8 @@ def locate_segment_in_original_text(segment, after, mapping):
     segment = sanitize(segment)
     a_start = after.find(segment)
     a_end = a_start + len(segment)
-    #if a_start == -1:
-        # if the annotator truncates the original sentence
-        # e.g. Minullla on älyttömästi asioita hoidettavana ennen keikkaa eikä...
-        #   -> Minullla on älyttömästi asioita hoidettavana.
-    #    segment = segment[:-1].lower()
-    #    a_start = after.lower().find(segment)
-    #    a_end = a_start + len(segment)
+    if a_end == len(after): # segment locates at the end of the text
+        return (mapping[a_start], mapping[a_end-1]-mapping[a_start]+1)
     if a_start == -1:
         return (0,0)
     else:
