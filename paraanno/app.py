@@ -14,6 +14,21 @@ app.config["TEMPLATES_AUTO_RELOAD"] = True
 DATADIR=os.environ["VIS_PICK_DATA"]
 APP_ROOT=os.environ.get("VIS_PICK_ROOT","")
 
+def build_spans(s, blocks):
+    """s:string, blocks are pairs of (idx,len) of perfect matches"""
+    #allright, this is pretty dumb alg!
+    matched_indices=[0]*len(s)
+    for i,l in blocks:
+        for idx in range(i,i+l):
+            matched_indices[idx]=max(matched_indices[idx],l)
+    spandata=[]
+    for c,matched_len in zip(s,matched_indices):
+        #matched_len=(matched_len//5)*5
+        if not spandata or spandata[-1][1]!=matched_len: #first or span with opposite match polarity -> must make new!
+            spandata.append(([],matched_len))
+        spandata[-1][0].append(c)
+    merged_spans=[(html.escape("".join(chars)),matched_len) for chars,matched_len in spandata]
+    return merged_spans, min(matched_indices),max(matched_indices) #min is actually always 0, but it's here for future need
 
 class Batch:
     def __init__(self, batchfile):
@@ -56,13 +71,13 @@ class Batch:
             elif indices1==(1,1):
                 print("INDEX WRONG",self.batchfile,"seg1",seg1, processed_txt1, file=sys.stderr)
             else:
-                print("SUCCESS")
+                pass #print("SUCCESS")
             if indices2==(0,0):
                 print("NOT FOUND",self.batchfile,"seg2",seg2, processed_txt2, file=sys.stderr)
             elif indices2==(1,1):
                 print("INDEX WRONG",self.batchfile,"seg2",seg2, processed_txt2, file=sys.stderr)
             else:
-                print("SUCCESS")
+                pass #print("SUCCESS")
 
             mapped_anns.append((indices1, indices2))
         return {"d1_text": d1_text,
@@ -126,7 +141,8 @@ def jobsinbatch(batchfile):
     for idx, pair in enumerate(pairs):
         text1 = all_batches[batchfile].data["segments"][idx]["d1_text"]
         text2 = all_batches[batchfile].data["segments"][idx]["d2_text"]
-        pairdata.append((idx, text1[:100], text2[:100]))
+        picked = len(all_batches[batchfile].new_data[idx]["annotation"])
+        pairdata.append((idx, picked, text1[:100], text2[:100]))
     return render_template("doc_list_in_batch.html",
                            app_root=APP_ROOT,
                            batchfile=batchfile,
@@ -140,11 +156,20 @@ def fetch_document(batchfile, pairseq):
     text1 = all_batches[batchfile].new_data[pairseq]["d1_text"]
     text2 = all_batches[batchfile].new_data[pairseq]["d2_text"]
     annotation = all_batches[batchfile].new_data[pairseq]["annotation"]
+
+    spandata1, min1, max1 = build_spans(text1, [ann1 for ann1, ann2 in annotation])
+    spandata2, min2, max2 = build_spans(text2, [ann2 for ann1, ann2 in annotation])
     
     return render_template("doc.html",
                            app_root=APP_ROOT,
+                           pair_num=len(annotation),
                            left_text=text1,
                            right_text=text2,
+                           left_spandata=spandata1,
+                           right_spandata=spandata2,
+                           min_mlen=min(min1,min2),
+                           max_mlen=max(max1,max2)+1,
+                           mlenv=min(max(max1,max2),30),
                            pairseq=pairseq,
                            batchfile=batchfile,
                            annotation=annotation,

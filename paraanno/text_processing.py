@@ -100,6 +100,6 @@ def locate_segment_in_original_text(segment, after, mapping):
         return (0,0)
     else:
         try:
-            return (mapping[a_start], mapping[a_end])
+            return (mapping[a_start], mapping[a_end]-mapping[a_start]) # start, len
         except KeyError:
             return (1,1)

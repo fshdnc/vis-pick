@@ -19,15 +19,16 @@
       </ol>
 
 
-      {% for idx,text1,text2 in pairdata %}
+      {% for idx,picked,text1,text2 in pairdata %}
       <div class="row">
 	<div class="col-1">
 	  <a href="{{app_root}}/ann/{{batchfile}}/{{idx}}">{{idx}}</a>
 	</div>
+	<div class="col-1">
+	  {{picked}} pair(s)
+	</div>
 	<div class="col-5">
 	  {{text1[:55]}}
-	</div>
-	<div class="col-1">
 	</div>
 	<div class="col-5">
 	  {{text2[:55]}}
